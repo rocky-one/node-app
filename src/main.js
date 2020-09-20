@@ -41,11 +41,21 @@ function reload() {
     }
     kill(workers[0])
 }
+// 杀死所有子线程
+function killWorkers() {
+    Object.keys(cluster.workers).forEach(key => {
+        cluster.workers[key].kill()
+    })
+    process.exit(0)
+}
+
 // 主线程
 if(cluster.isMaster) {
-    for(let i = 0; i < cupCount; i++) {
+    for(let i = 0; i < 2; i++) {
         createFork()
-    }  
+    } 
+    process.on('SIGINT',killWorkers)
+    process.on('SIGTERM',killWorkers)
 }else{
     app()
     process.on('message', function(msg){  
